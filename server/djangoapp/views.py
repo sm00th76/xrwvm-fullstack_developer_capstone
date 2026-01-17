@@ -81,11 +81,17 @@ def get_dealer_reviews(request, dealer_id):
     # if dealer id has been provided
     if(dealer_id):
         endpoint = "/fetchReviews/dealer/"+str(dealer_id)
-        reviews = get_request(endpoint)
+        reviews = get_request(endpoint) or []
         for review_detail in reviews:
-            response = analyze_review_sentiments(review_detail['review'])
-            print(response)
-            review_detail['sentiment'] = response['sentiment']
+            # Default to positive sentiment when analyzer is unavailable
+            sentiment = "positive"
+            try:
+                response = analyze_review_sentiments(review_detail.get('review', ''))
+                if isinstance(response, dict) and response.get('sentiment'):
+                    sentiment = response['sentiment']
+            except Exception as err:
+                logger.warning(f"Sentiment analysis failed: {err}")
+            review_detail['sentiment'] = sentiment
         return JsonResponse({"status":200,"reviews":reviews})
     else:
         return JsonResponse({"status":400,"message":"Bad Request"})

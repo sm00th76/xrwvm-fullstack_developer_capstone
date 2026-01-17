@@ -12,31 +12,40 @@ const Dealer = () => {
 
 
   const [dealer, setDealer] = useState({});
+  const [dealerLoading, setDealerLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [unreviewed, setUnreviewed] = useState(false);
   const [postReview, setPostReview] = useState(<></>)
 
-  let curr_url = window.location.href;
-  let root_url = curr_url.substring(0,curr_url.indexOf("dealer"));
-  let params = useParams();
-  let id =params.id;
-  let dealer_url = root_url+`djangoapp/dealer/${id}`;
-  let reviews_url = root_url+`djangoapp/reviews/dealer/${id}`;
-  let post_review = root_url+`postreview/${id}`;
+  const params = useParams();
+  const id = params.dealer_id;
+  const dealer_url = `/djangoapp/dealer/${id}`;
+  const reviews_url = `/djangoapp/reviews/dealer/${id}`;
+  const post_review = `/post-review/${id}`;
   
   const get_dealer = async ()=>{
+    if(!id) return;
     const res = await fetch(dealer_url, {
       method: "GET"
     });
-    const retobj = await res.json();
-    
-    if(retobj.status === 200) {
-      let dealerobjs = Array.from(retobj.dealer)
-      setDealer(dealerobjs[0])
+    try {
+      const retobj = await res.json();
+      if(retobj.status === 200) {
+        // Handle backend returning either an object or an array
+        const dealerData = Array.isArray(retobj.dealer) ? retobj.dealer[0] : retobj.dealer;
+        setDealer(dealerData || {});
+      } else {
+        setDealer({});
+      }
+    } catch(err) {
+      setDealer({});
+    } finally {
+      setDealerLoading(false);
     }
   }
 
   const get_reviews = async ()=>{
+    if(!id) return;
     const res = await fetch(reviews_url, {
       method: "GET"
     });
@@ -52,7 +61,8 @@ const Dealer = () => {
   }
 
   const senti_icon = (sentiment)=>{
-    let icon = sentiment === "positive"?positive_icon:sentiment==="negative"?negative_icon:neutral_icon;
+    const s = sentiment || "positive"; // default to positive icon for now
+    let icon = s === "positive" ? positive_icon : s === "negative" ? negative_icon : neutral_icon;
     return icon;
   }
 
@@ -71,10 +81,12 @@ return(
   <div style={{margin:"20px"}}>
       <Header/>
       <div style={{marginTop:"10px"}}>
-      <h1 style={{color:"grey"}}>{dealer.full_name}{postReview}</h1>
-      <h4  style={{color:"grey"}}>{dealer['city']},{dealer['address']}, Zip - {dealer['zip']}, {dealer['state']} </h4>
+      <h1 style={{color:"grey"}}>{dealer && dealer.full_name ? dealer.full_name : (dealerLoading ? "Loading Dealer..." : "Dealer Not Found")}{postReview}</h1>
+      {dealer && dealer.full_name && (
+        <h4  style={{color:"grey"}}>{dealer['city']},{dealer['address']}, Zip - {dealer['zip']}, {dealer['state']} </h4>
+      )}
       </div>
-      <div class="reviews_panel">
+      <div className="reviews_panel">
       {reviews.length === 0 && unreviewed === false ? (
         <text>Loading Reviews....</text>
       ):  unreviewed === true? <div>No reviews yet! </div> :

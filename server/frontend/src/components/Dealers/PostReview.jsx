@@ -13,13 +13,11 @@ const PostReview = () => {
   const [date, setDate] = useState("");
   const [carmodels, setCarmodels] = useState([]);
 
-  let curr_url = window.location.href;
-  let root_url = curr_url.substring(0,curr_url.indexOf("postreview"));
-  let params = useParams();
-  let id =params.id;
-  let dealer_url = root_url+`djangoapp/dealer/${id}`;
-  let review_url = root_url+`djangoapp/add_review`;
-  let carmodels_url = root_url+`djangoapp/get_cars`;
+  const params = useParams();
+  const id = params.dealer_id;
+  const dealer_url = `/djangoapp/dealer/${id}`;
+  const review_url = `/djangoapp/add_review`;
+  const carmodels_url = `/djangoapp/get_cars`;
 
   const postreview = async ()=>{
     let name = sessionStorage.getItem("firstname")+" "+sessionStorage.getItem("lastname");
@@ -63,15 +61,12 @@ const PostReview = () => {
 
   }
   const get_dealer = async ()=>{
-    const res = await fetch(dealer_url, {
-      method: "GET"
-    });
+    if(!id) return;
+    const res = await fetch(dealer_url, { method: "GET" });
     const retobj = await res.json();
-    
     if(retobj.status === 200) {
-      let dealerobjs = Array.from(retobj.dealer)
-      if(dealerobjs.length > 0)
-        setDealer(dealerobjs[0])
+      const dealerData = Array.isArray(retobj.dealer) ? retobj.dealer[0] : retobj.dealer;
+      if (dealerData) setDealer(dealerData);
     }
   }
 
@@ -94,7 +89,7 @@ const PostReview = () => {
     <div>
       <Header/>
       <div  style={{margin:"5%"}}>
-      <h1 style={{color:"darkblue"}}>{dealer.full_name}</h1>
+      <h1 style={{color:"darkblue"}}>{dealer?.full_name || "Loading Dealer..."}</h1>
       <textarea id='review' cols='50' rows='7' onChange={(e) => setReview(e.target.value)}></textarea>
       <div className='input_field'>
       Purchase Date <input type="date" onChange={(e) => setDate(e.target.value)}/>

@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.conf.urls.static import static
 from django.conf import settings
@@ -27,4 +28,10 @@ urlpatterns = [
     path('contact/', TemplateView.as_view(template_name="contact.html")),
     path('login/', TemplateView.as_view(template_name="index.html")),
     path('register/', TemplateView.as_view(template_name="index.html")),
+    path('dealers/', TemplateView.as_view(template_name="index.html")),
+    path('dealer/<int:dealer_id>',TemplateView.as_view(template_name="index.html")),
+    # Serve manifest.json from static for PWA assets
+    path('manifest.json', lambda request: redirect('/static/manifest.json')),
+    path('postreview/<int:dealer_id>',TemplateView.as_view(template_name="index.html")),
+    path('post-review/<int:dealer_id>',TemplateView.as_view(template_name="index.html")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
