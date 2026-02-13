@@ -169,4 +169,3 @@ STATICFILES_DIRS = [
         'frontend/build/static',
     ),
 ]
-
