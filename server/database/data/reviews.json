@@ -549,6 +549,17 @@
       "car_make": "Cadillac",
       "car_model": "DeVille",
       "car_year": 1995
+    },
+    {
+      "id": 51,
+      "name": "baladitya kahntwal",
+      "dealership": 2,
+      "review": "awesome car!",
+      "purchase": true,
+      "purchase_date": "05/02/2027",
+      "car_make": "Ford",
+      "car_model": "Beemer",
+      "car_year": 2020
     }
   ]
 }
